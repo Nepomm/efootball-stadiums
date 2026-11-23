@@ -1,29 +1,30 @@
-
 import json
+import os
 from pathlib import Path
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
-
 app = FastAPI(
     title="EFOOTBALL STADIUMS API",
     description="API para catalogar os estádios do eFootball",
     version="1.0.0"
 )
-
-# Permitir comunicação com o React
+# Permitir comunicação com o React (local + produção via variável ALLOWED_ORIGINS)
+default_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+extra_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=default_origins + extra_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Localização do arquivo JSON
 DATA_FILE = Path(__file__).parent / "data" / "stadiums.json"
 
